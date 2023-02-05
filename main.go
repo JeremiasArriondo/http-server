@@ -1,15 +1,36 @@
 package main
 
 import (
+	"context"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/JeremiasArriondo/http-server/server"
 )
 
 func main() {
 
+	ctx := context.Background()
+
+	serverDoneChan := make(chan os.Signal, 1)
+
+	signal.Notify(serverDoneChan, os.Interrupt, syscall.SIGTERM)
+
 	srv := server.New(":8080")
 
-	err := srv.ListenAndServe()
-	if err != nil {
-		panic(err)
-	}
+	go func() {
+		err := srv.ListenAndServe()
+		if err != nil {
+			panic(err)
+		}
+	}()
+
+	log.Println("server stared")
+
+	<-serverDoneChan
+
+	srv.Shutdown(ctx)
+	log.Println("server stoped")
 }
