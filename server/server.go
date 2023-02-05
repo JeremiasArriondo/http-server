@@ -7,6 +7,8 @@ type Country struct {
 	Language string
 }
 
+var countries []*Country = []*Country{}
+
 func New(addr string) *http.Server {
 	initRoutes()
 
